@@ -26,6 +26,7 @@ Se incluyen 9 datasets fuente utilizados para el análisis:
 - Python (Pandas, Scikit-Learn, SQLAlchemy, GeoPandas)
 - PostgreSQL / PgAdmin 4
 - PowerBI
+- Carto
 
 ## Instrucciones de Reproducción
 1. Instalar dependencias: `pip install -r requirements.txt`
