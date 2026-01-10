@@ -14,11 +14,13 @@ Se incluyen 9 datasets fuente utilizados para el análisis:
 - **B5**: Licencias urbanísticas.
 - **B6 y B7**: Datos demográficos y poblacionales.
 - **B8 y B9**: Infraestructura (parking y transporte).
+**⚠️ Nota sobre Archivos Grandes:**
+> Los archivos `actividadeconomica` y `licencias` en raw se encuentran comprimidos en formato `.zip` debido a su tamaño. El script de carga los procesa automáticamente.
 
 ### 2. Código Fuente (`/src`)
-- **ETL e Ingesta**: Scripts para limpieza de datos y carga en base de datos PostgreSQL.
-- **Ranking**: Algoritmo de ponderación para el scoring de zonas.
-- **Machine Learning**: Modelado predictivo para estimar éxito/facturación.
+- **`01_etl_db`**: Scripts para limpieza de datos y carga en base de datos PostgreSQL.
+- **`02_ranking`**: Algoritmo de ponderación para el scoring de mejor zona para un restaurante mexicano en Madrid.
+- **`03_models`**: Entrenamiento y validación del modelo de Machine Learning.
 
 ## Tecnologías Utilizadas
 - Python (Pandas, Scikit-Learn, SQLAlchemy, GeoPandas)
