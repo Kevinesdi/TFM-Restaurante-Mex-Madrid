@@ -1,0 +1,238 @@
+CREATE SCHEMA IF NOT EXISTS dw_tfm_restaurantes;
+SET search_path TO dw_tfm_restaurantes, public;
+
+-- Dimensión de Distritos
+DROP TABLE IF EXISTS dw_tfm_restaurantes.dim_distrito CASCADE;
+CREATE TABLE dw_tfm_restaurantes.dim_distrito (
+    id_distrito INT PRIMARY KEY,
+    nombre_distrito VARCHAR(100) NOT NULL
+);
+
+-- Dimensión de Barrios
+DROP TABLE IF EXISTS dw_tfm_restaurantes.dim_barrio CASCADE;
+CREATE TABLE dw_tfm_restaurantes.dim_barrio (
+    id_barrio INT PRIMARY KEY,
+    nombre_barrio VARCHAR(100) NOT NULL,
+    id_distrito INT REFERENCES dw_tfm_restaurantes.dim_distrito(id_distrito)
+);
+
+
+-- 1. Tabla de locales de hostelería (Base principal)
+CREATE TABLE restaurantes (
+    id_local BIGINT PRIMARY KEY,
+    id_distrito_local INTEGER,
+    desc_distrito_local VARCHAR(255),
+    id_barrio_local INTEGER,
+    desc_barrio_local VARCHAR(255),
+    coordenada_x_local DOUBLE PRECISION,
+    coordenada_y_local DOUBLE PRECISION,
+    latitud DOUBLE PRECISION,
+    longitud DOUBLE PRECISION,
+    rotulo VARCHAR(255),
+    id_seccion VARCHAR(50),
+    desc_seccion VARCHAR(255),
+    id_division INTEGER,
+    desc_division VARCHAR(255),
+    rotulo_new VARCHAR(255),
+    tipo_cocina VARCHAR(100),
+    revisar_manual VARCHAR(50)
+);
+
+-- 2. Análisis de Menús y Opiniones (Específico Mexicanos)
+CREATE TABLE menu_restaurantes_mx (
+    id_plato SERIAL PRIMARY KEY,
+    id_local BIGINT,
+    rotulo VARCHAR(255),
+    platos TEXT,
+    precio DOUBLE PRECISION,
+    estrellas DOUBLE PRECISION,
+    numero_opiniones INTEGER,
+    calle VARCHAR(255),
+    FOREIGN KEY (id_local) REFERENCES restaurantes(id_local)
+);
+
+-- 3. Información de Terrazas
+CREATE TABLE terrazas (
+    id_terraza BIGINT PRIMARY KEY,
+    id_local BIGINT,
+    id_distrito_local INTEGER,
+    desc_distrito_local VARCHAR(255),
+    id_barrio_local INTEGER,
+    desc_barrio_local VARCHAR(255),
+    tipo_de_via VARCHAR(100),
+    nombre_via VARCHAR(255),
+    numero_via INTEGER,
+    cod_postal INTEGER,
+    coordenada_x_local DOUBLE PRECISION,
+    coordenada_y_local DOUBLE PRECISION,
+    latitud DOUBLE PRECISION,
+    longitud DOUBLE PRECISION,
+    nombre_comercial VARCHAR(255),
+    id_periodo_terraza INTEGER,
+    desc_periodo_terraza VARCHAR(100)
+);
+
+-- 4. Flujo de Peatones (Datos temporales y de tráfico)
+CREATE TABLE flujo_peatones (
+    id_registro_peaton SERIAL PRIMARY KEY,
+    fecha_peatones DATE,
+    hora_peatones TIME,
+    cantidad_peatones INTEGER,
+    numero_distrito_peatones INTEGER,
+    distrito VARCHAR(100),
+    direccion VARCHAR(255),
+    latitud VARCHAR(50), -- Se mantiene como VARCHAR por el formato con comas de origen
+    longitud VARCHAR(50)
+);
+
+-- 5. Licencias de Funcionamiento
+CREATE TABLE licencias (
+    id_registro_licencia SERIAL PRIMARY KEY,
+    id_local BIGINT,
+    id_distrito_local INTEGER,
+    desc_distrito_local VARCHAR(255),
+    id_barrio_local INTEGER,
+    desc_barrio_local VARCHAR(255),
+    coordenada_x_local DOUBLE PRECISION,
+    coordenada_y_local DOUBLE PRECISION,
+    latitud DOUBLE PRECISION,
+    longitud DOUBLE PRECISION,
+    id_tipo_licencia INTEGER,
+    desc_tipo_licencia VARCHAR(255),
+    id_tipo_situacion_licencia INTEGER,
+    desc_tipo_situacion_licencia VARCHAR(255)
+);
+
+-- 6. Demografía: Residentes por Edad y Nacionalidad
+CREATE TABLE residentes_demografia (
+    id_demografia SERIAL PRIMARY KEY,
+    cod_distrito INTEGER,
+    desc_distrito VARCHAR(100),
+    cod_dist_barrio INTEGER,
+    desc_barrio VARCHAR(100),
+    cod_barrio INTEGER,
+    cod_dist_seccion INTEGER,
+    cod_seccion INTEGER,
+    cod_edad_int INTEGER,
+    espanoles_hombres INTEGER,
+    espanoles_mujeres INTEGER,
+    extranjeros_hombres INTEGER,
+    extranjeros_mujeres INTEGER,
+    fx_carga VARCHAR(50),
+    fx_datos_ini VARCHAR(50),
+    fx_datos_fin VARCHAR(50)
+);
+
+-- 7. Población General de Madrid
+CREATE TABLE poblacion_madrid (
+    id_poblacion SERIAL PRIMARY KEY,
+    fecha VARCHAR(50),
+    cod_municipio INTEGER,
+    municipio VARCHAR(100),
+    cod_distrito INTEGER,
+    distrito VARCHAR(100),
+    cod_barrio INTEGER,
+    barrio VARCHAR(100),
+    num_personas DOUBLE PRECISION,
+    num_personas_hombres DOUBLE PRECISION,
+    num_personas_mujeres DOUBLE PRECISION
+);
+
+-- 8. Aparcamientos Públicos
+CREATE TABLE aparcamientos (
+    id_aparcamiento SERIAL PRIMARY KEY,
+    nombre_parqueo VARCHAR(255),
+    plazas_publicas INTEGER,
+    plazas_residentes DOUBLE PRECISION,
+    motocicletas DOUBLE PRECISION,
+    clase_vial VARCHAR(100),
+    nombre_via VARCHAR(255),
+    num_via INTEGER,
+    cod_barrio INTEGER,
+    barrio VARCHAR(100),
+    cod_distrito INTEGER,
+    distrito VARCHAR(100),
+    coordenada_x DOUBLE PRECISION,
+    coordenada_y DOUBLE PRECISION,
+    latitud DOUBLE PRECISION,
+    longitud DOUBLE PRECISION
+);
+
+-- 9. Estaciones de Transporte (Metro y Cercanías)
+CREATE TABLE transporte_publico (
+    id_estacion SERIAL PRIMARY KEY,
+    tipo VARCHAR(100), -- Metro o Cercanías
+    nombre VARCHAR(255),
+    latitud DOUBLE PRECISION,
+    longitud DOUBLE PRECISION
+);
+
+2. Población de Dimensiones (Inyectar datos únicos)
+
+-- Aseguramos que estamos en el esquema correcto
+SET search_path TO dw_tfm_restaurantes, public;
+
+-- 1. Insertar distritos únicos desde la tabla de restaurantes
+-- Usamos el nombre exacto de la tabla que creaste (restaurantes)
+INSERT INTO dw_tfm_restaurantes.dim_distrito (id_distrito, nombre_distrito)
+SELECT DISTINCT id_distrito_local, desc_distrito_local
+FROM dw_tfm_restaurantes.restaurantes
+WHERE id_distrito_local IS NOT NULL
+ON CONFLICT (id_distrito) DO NOTHING;
+
+-- 2. Insertar barrios únicos
+INSERT INTO dw_tfm_restaurantes.dim_barrio (id_barrio, nombre_barrio, id_distrito)
+SELECT DISTINCT id_barrio_local, desc_barrio_local, id_distrito_local
+FROM dw_tfm_restaurantes.restaurantes
+WHERE id_barrio_local IS NOT NULL
+ON CONFLICT (id_barrio) DO NOTHING;
+
+-- Alimentar distritos desde la tabla de población por si hay nuevos
+INSERT INTO dw_tfm_restaurantes.dim_distrito (id_distrito, nombre_distrito)
+SELECT DISTINCT cod_distrito, distrito
+FROM dw_tfm_restaurantes.poblacion_madrid
+ON CONFLICT (id_distrito) DO NOTHING;
+
+
+
+SET search_path TO dw_tfm_restaurantes, public;
+
+-- 1. Eliminar licencias de locales que no existen en nuestra tabla maestra
+DELETE FROM dw_tfm_restaurantes.licencias
+WHERE id_local NOT IN (SELECT id_local FROM dw_tfm_restaurantes.restaurantes);
+
+-- 2. Eliminar terrazas de locales que no existen en nuestra tabla maestra
+DELETE FROM dw_tfm_restaurantes.terrazas
+WHERE id_local NOT IN (SELECT id_local FROM dw_tfm_restaurantes.restaurantes);
+
+-- 3. (Opcional) Verificar si quedan huérfanos en menús (aunque mi análisis dice que están limpios)
+DELETE FROM dw_tfm_restaurantes.menu_restaurantes_mx
+WHERE id_local NOT IN (SELECT id_local FROM dw_tfm_restaurantes.restaurantes);
+
+
+3. Establecimiento de Claves Foráneas (Relaciones)
+
+-- Relacionar Restaurantes con Distrito
+ALTER TABLE restaurantes
+ADD CONSTRAINT fk_rest_distrito 
+FOREIGN KEY (id_distrito_local) REFERENCES dw_tfm_restaurantes.dim_distrito(id_distrito);
+
+-- Relacionar Licencias con Restaurantes
+ALTER TABLE licencias
+ADD CONSTRAINT fk_licencia_local 
+FOREIGN KEY (id_local) REFERENCES restaurantes(id_local);
+
+-- Relacionar Menús con Restaurantes
+ALTER TABLE menu_restaurantes_mx
+ADD CONSTRAINT fk_menu_local 
+FOREIGN KEY (id_local) REFERENCES restaurantes(id_local);
+
+-- Relacionar Flujo de Peatones con Distrito
+ALTER TABLE flujo_peatones
+ADD CONSTRAINT fk_peaton_distrito 
+FOREIGN KEY (numero_distrito_peatones) REFERENCES dw_tfm_restaurantes.dim_distrito(id_distrito);
+
+-- Relacionar Flujo de Peatones con Terrazas
+ALTER TABLE dw_tfm_restaurantes.terrazas
+ADD CONSTRAINT fk_terraza_local 
+FOREIGN KEY (id_local) REFERENCES dw_tfm_restaurantes.restaurantes(id_local);
