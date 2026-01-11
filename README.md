@@ -26,7 +26,7 @@ Se incluyen 9 datasets fuente utilizados para el análisis:
 - Python (Pandas, Scikit-Learn, SQLAlchemy, GeoPandas)
 - PostgreSQL / PgAdmin 4
 - PowerBI
-- Carto
+- Carto : https://pinea.app.carto.com/map/d3bf16bb-2e2c-4086-ae2c-12385d32faf4
 
 ## Instrucciones de Reproducción
 1. Instalar dependencias: `pip install -r requirements.txt`
