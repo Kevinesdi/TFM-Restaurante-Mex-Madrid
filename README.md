@@ -27,7 +27,9 @@ Se incluyen 9 datasets fuente utilizados para el análisis:
 - PostgreSQL / PgAdmin 4
 - PowerBI: <img width="299" height="341" alt="image" src="https://github.com/user-attachments/assets/c82475d6-c981-49a9-a8fb-52170c839225" />
 
-- Carto : https://pinea.app.carto.com/map/d3bf16bb-2e2c-4086-ae2c-12385d32faf4
+- Carto :<img width="539" height="501" alt="image" src="https://github.com/user-attachments/assets/242b646d-c32e-4385-a5d7-e3ebb668abcf" />
+
+- https://pinea.app.carto.com/map/d3bf16bb-2e2c-4086-ae2c-12385d32faf4
 
 ## Instrucciones de Reproducción
 1. Instalar dependencias: `pip install -r requirements.txt`
