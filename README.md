@@ -25,7 +25,8 @@ Se incluyen 9 datasets fuente utilizados para el análisis:
 ## Tecnologías Utilizadas
 - Python (Pandas, Scikit-Learn, SQLAlchemy, GeoPandas)
 - PostgreSQL / PgAdmin 4
-- PowerBI
+- PowerBI: <img width="299" height="341" alt="image" src="https://github.com/user-attachments/assets/c82475d6-c981-49a9-a8fb-52170c839225" />
+
 - Carto : https://pinea.app.carto.com/map/d3bf16bb-2e2c-4086-ae2c-12385d32faf4
 
 ## Instrucciones de Reproducción
